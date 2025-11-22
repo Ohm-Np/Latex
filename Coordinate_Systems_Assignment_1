@@ -1,0 +1,968 @@
+% Dokumentklasse
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,sans,fleqn,11pt]{scrartcl} 
+
+%\usepackage[latin1]{inputenc} % Kodierung: ISO-8859-1
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel} % Spracheinstellung
+\usepackage[paper=a4paper,left=30mm,right=32mm,top=30mm,bottom=25mm]{geometry} % Format
+\usepackage{siunitx}
+
+
+% Einbindung von Paketen
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{verbatim} % mehrzeilige Kommentare innerhalb des Dokuments
+\usepackage{color} % Einbindung von Farben
+
+% Pakte fuer Formeln, mathematische Umgebungen und Zeichen
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{dsfont}
+
+% eigene importierte Pakete und Festlegungen:
+\setcounter{MaxMatrixCols}{20} % mehr als 10 Matrixeinträge möglich
+\usepackage{bbold}  % Erlaubt das Zeichen des Einheitsvektors
+
+
+\usepackage{array} % array-Umgebung, die im mathematischen Modus zur Erzeugung von Matrizen dient
+\usepackage{hyperref} % Erzeugung von Links und Verweise innerhalb des Dokuments
+\usepackage{graphicx} % Einbindung von Grafiken
+\usepackage{subfig} % Zwei Bilder nebeneinander
+
+% Mehrere Figure nebeneinander mit Beschriftung
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{boxedminipage} % Erzeugung einer Minipage mit einen Rahmen darum
+\usepackage{ulem} % Text unterstreichen
+\usepackage{cancel} % Formel durchstreichen
+\usepackage{bbold}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage{float} % Damit Bilder an bestimmter Stelle stehen können
+\usepackage{tikz} % Tikz-Umgebung zum Zeichnen
+\usetikzlibrary{calc}
+\usetikzlibrary{
+  arrows,
+  decorations.pathreplacing,
+  decorations.pathmorphing,
+  decorations.markings,
+  shapes.symbols,
+  shapes.geometric,
+  positioning
+}
+\usepackage{listings}
+
+\newcommand\markangle[6][red]{% [color] {X} {origin} {Y} {mark} {radius}
+ % filled circle: red by default
+  \begin{scope}
+  \path[clip] (#2) -- (#3) -- (#4);
+  \fill[color=#1,fill = white,draw=#1,name path=circle] %opacity=0.5
+  (#3) circle (#6mm);
+   \end{scope}
+   % middle calculation
+   \path[name path=line one] (#3) -- (#2);
+  \path[name path=line two] (#3) -- (#4);
+\path[%
+name intersections={of=line one and circle, by={inter one}},
+ name intersections={of=line two and circle, by={inter two}}
+ ] (inter one) -- (inter two) coordinate[pos=.5] (middle);
+ % bissectrice definition
+ \path[%
+name path=bissectrice
+] (#3) -- (barycentric cs:#3=-1,middle=1.2);
+ % put mark
+ \path[
+ name intersections={of=bissectrice and circle, by={middleArc}}
+ ] (#3) -- (middleArc) node[pos=0.6] {#5}; % node[pos=1.3]
+ }
+\usetikzlibrary{intersections}
+
+
+
+% Blattausnutzung optimieren
+\parindent 0mm                        % Einruecktiefe von Absaetzen: 0 mm
+
+% Hoehe
+\addtolength{\topmargin}{-2cm}
+\addtolength{\textheight}{1cm}
+
+% Breite
+\addtolength{\textwidth}{2cm}
+\addtolength{\oddsidemargin}{-1cm}
+\addtolength{\marginparwidth}{-1cm}
+
+% Hier bitte Daten eingeben
+\newcommand{\semester}{WiSe 2025}
+
+\begin{document}
+
+\sffamily
+
+% Kopfzeile
+\begin{minipage}{\textwidth}
+\begin{minipage}[t]{0.6\textwidth}
+{\Large \textbf{Institute of Geodesy and Geoinformation für Geodäsie und Geoinformation}}\\
+{\small University of Bonn}
+\end{minipage}
+\hfill
+\raisebox{-5ex}{
+\includegraphics[height=1.5cm]{figures/uniBonn.png} \hspace{2mm} \includegraphics[height=1.5cm]{figures/iggB.pdf}
+}
+\end{minipage}
+\\
+% Hier der Name des Bearbeiters
+\begin{flushright}
+	\hfill{\today}
+\end{flushright}
+
+
+\pagestyle{plain}
+\par\noindent\rule{\textwidth}{0.4pt}
+\begin{center}
+    % Überschrift
+	{\textbf {\Large Course: Coordinate Systems }} \\[3mm]
+	{\textbf {\Large Homework 1 - Transformations, Quaternions and Homogeneous
+Representation}}\\[2mm]
+     {\textbf{Om Prakash Bhandari }}
+\end{center}
+\par\noindent\rule{\textwidth}{0.4pt}
+% Aufgabenteile einfügen
+
+\section{A Translation and Rotation}
+\paragraph*{Task 1}
+Consider a point $\mathbf{p}$ with coordinates
+\[
+\mathbf{p} = \begin{bmatrix} 4 & 0.9 & -0.1 \end{bmatrix}^{\mathsf{T}}
+\]
+
+Provide the coordinates of the transformed points 
+$\mathbf{p}'$, $\mathbf{p}''$, $\mathbf{p}'''$, and $\mathbf{p}''''$ 
+after applying the following transformation:
+
+\begin{enumerate}
+\item[\textbf{(a)}] Translation $\mathbf{T}_t$ with translation vector
+\[
+\mathbf{p} = \begin{bmatrix} 1 & -1.4 & 7 \end{bmatrix}^{\mathsf{T}}
+\]
+\end{enumerate}
+
+\paragraph*{Solution:}
+Translation is applied component-wise:
+\[
+p' = p + t
+= \begin{bmatrix}4\\[4pt]0.9\\[4pt]-0.1\end{bmatrix}
++ \begin{bmatrix}1\\[4pt]-1.4\\[4pt]7.0\end{bmatrix}
+= \begin{bmatrix}5\\[4pt]-0.5\\[4pt]6.9\end{bmatrix}.
+\]
+
+The new point $\mathbf{p}'$ is 1 unit to the right, 1.4 units below and 7 units higher than the original. \\
+
+xy-plane diagram for the original point p and translated point p':
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=1.3,>=stealth]
+
+% Axes with shorter y-axis
+\draw[->,thick] (-1,0)--(7,0) node[right]{$x$};
+\draw[->,thick] (0,-1)--(0,2) node[above]{$y$};
+
+% Original point p
+\fill[blue] (4,0.9) circle (2pt);
+\node[blue, right] at (4,0.9) {$p(4,0.9)$};
+
+% Translated point p'
+\fill[red] (5,-0.5) circle (2pt);
+\node[red, above right] at (5,-0.5) {$p'(5,-0.5)$};
+
+% Draw translation vector
+\draw[->,thick,green!70!black] (4,0.9)--(5,-0.5) node[midway,right] {$\mathbf{t}=[1,-1.4]^T$};
+
+% Origin
+\fill (0,0) circle (1pt);
+\node[below left] at (0,0) {$O$};
+
+% Dashed lines from origin to points
+\draw[blue, dashed] (0,0)--(4,0.9);
+\draw[red, dashed] (0,0)--(5,-0.5);
+
+\end{tikzpicture}
+\caption{Translation of point \(p\) by vector \(\mathbf{t}=[1,-1.4,7]^T\) in the xy-plane, resulting in \(p'\).}
+\end{figure}
+
+\begin{enumerate}
+\item[\textbf{(b)}] Rotation $\mathbf{R}_z(\phi)$ with $\phi = 50^\circ$.
+\end{enumerate}
+
+A rotation about the z-axis changes the x and y coordinates but keeps z the same. 
+
+The rotation about the \(z\)-axis is
+\[
+R_z(\varphi)=
+\begin{bmatrix}
+\cos\varphi & -\sin\varphi & 0\\[6pt]
+\sin\varphi & \cos\varphi  & 0\\[6pt]
+0 & 0 & 1
+\end{bmatrix},\qquad \varphi=50^\circ.
+\]
+Numerically (to 4 d.p.)
+\[
+R_z(50^\circ)\approx
+\begin{bmatrix}
+0.6428 & -0.7660 & 0\\[4pt]
+0.7660 & 0.6428  & 0\\[4pt]
+0 & 0 & 1
+\end{bmatrix}.
+\]
+Then
+\[
+p'' = R_z(50^\circ)\,p
+\approx
+\begin{bmatrix}
+0.6428 & -0.7660 & 0\\[4pt]
+0.7660 & 0.6428  & 0\\[4pt]
+0 & 0 & 1
+\end{bmatrix}
+\begin{bmatrix}4\\[4pt]0.9\\[4pt]-0.1\end{bmatrix}
+\approx
+\begin{bmatrix}1.8817\\[4pt]3.6427\\[4pt]-0.1\end{bmatrix}.
+\]
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=1.3,>=stealth]
+
+% Axes
+\draw[->,thick] (-1,0)--(5,0) node[right]{$x$};
+\draw[->,thick] (0,-1)--(0,4) node[above]{$y$};
+
+% Original point p
+\fill[blue] (4,0.9) circle (2pt);
+\node[blue, right] at (4,0.9) {$p(4,0.9)$};
+
+% Rotated point p'' (50° about z-axis)
+\fill[red] (1.88,3.64) circle (2pt);
+\node[red, above right] at (1.88,3.64) {$p''(1.88,3.64)$};
+
+% Dashed lines from origin
+\draw[blue, dashed] (0,0)--(4,0.9);
+\draw[red, dashed] (0,0)--(1.88,3.64);
+
+% Rotation arc
+\draw[->,thick,gray!70] (1.5,0) arc[start angle=0, end angle=50, radius=1.5];
+\node[gray!70] at (1.3,0.5) {$50^\circ$};
+
+% Origin
+\fill (0,0) circle (1pt);
+\node[below left] at (0,0) {$O$};
+
+\end{tikzpicture}
+\caption{Rotation of point \(p\) about the z-axis by \(50^\circ\), resulting in \(p''\) in the xy-plane.}
+\end{figure}
+
+
+\subsection*{(c) Rotation \(R_z(\varphi_1)\) followed by \(R_y(\varphi_2)\) with \(\varphi_1=-30^\circ,\ \varphi_2=90^\circ\)}
+First
+\[
+R_z(-30^\circ)=
+\begin{bmatrix}
+\cos(-30^\circ) & -\sin(-30^\circ) & 0\\[6pt]
+\sin(-30^\circ) & \cos(-30^\circ)  & 0\\[6pt]
+0 & 0 & 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+\cos30^\circ & \sin30^\circ & 0\\[4pt]
+-\sin30^\circ & \cos30^\circ & 0\\[4pt]
+0 & 0 & 1
+\end{bmatrix},
+\]
+and
+\[
+R_y(90^\circ)=
+\begin{bmatrix}
+\cos90^\circ & 0 & \sin90^\circ\\[6pt]
+0 & 1 & 0\\[6pt]
+-\sin90^\circ & 0 & \cos90^\circ
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 & 0 & 1\\[4pt]
+0 & 1 & 0\\[4pt]
+-1 & 0 & 0
+\end{bmatrix}.
+\]
+Apply \(R_z(-30^\circ)\) first, then \(R_y(90^\circ)\):
+\[
+p''' = R_y(90^\circ)\,R_z(-30^\circ)\,p
+\approx
+\begin{bmatrix}-0.1\\[4pt]-1.2206\\[4pt]-3.9141\end{bmatrix}.
+\]
+
+The first rotation tilts the point in the xy-plane, and the second one swings it 90° about the y-axis — so most of its x-component becomes a negative z-component.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=1.2,>=stealth]
+
+% 3D coordinate system
+\draw[->,thick] (0,0,0)--(5,0,0) node[right]{$x$};
+\draw[->,thick] (0,0,0)--(0,5,0) node[above]{$y$};
+\draw[->,thick] (0,0,0)--(0,0,5) node[left]{$z$};
+
+% Original point p = (4, 0.9, -0.1)
+\coordinate (p) at (4,0.9,-0.1);
+\fill[blue] (p) circle (2pt);
+\node[blue,right] at (p) {$p(4,0.9,-0.1)$};
+
+% After first rotation Rz(-30°): approx (3.446, -1.45, -0.1)
+\coordinate (pz) at (3.446,-1.45,-0.1);
+\fill[orange] (pz) circle (2pt);
+\node[orange,below right] at (pz) {$R_z(-30^\circ)p$};
+
+% Final point after Ry(90°): approx (-0.1, -1.2206, -3.9141)
+\coordinate (pf) at (-0.1,-1.2206,-3.9141);
+\fill[red] (pf) circle (2pt);
+\node[red,left] at (pf) {$p'''$};
+
+% Lines from origin to each point
+\draw[blue,dashed] (0,0,0)--(p);
+\draw[orange,dashed] (0,0,0)--(pz);
+\draw[red,dashed] (0,0,0)--(pf);
+
+\end{tikzpicture}
+\caption{3D visualization of the two-step rotation: first \(R_z(-30^\circ)\), then \(R_y(90^\circ)\), applied to point \(p\).}
+\end{figure}
+
+\subsection*{(d) Translation \(T_t\) as in (a) followed by rotation \(R_z(50^\circ)\) as in (b)}
+Compute \(p+t\) then rotate:
+\[
+p+t=\begin{bmatrix}5\\[4pt]-0.5\\[4pt]6.9\end{bmatrix},\qquad
+p''''=R_z(50^\circ)\,(p+t)
+\approx
+\begin{bmatrix}3.5970\\[4pt]3.5088\\[4pt]6.9\end{bmatrix}.
+\]
+
+The translation moves the point, then rotation reorients it in the xy-plane.
+The z-value stays the same since we rotated around the z-axis.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=1.3,>=stealth]
+
+% Axes
+\draw[->,thick] (-1,0)--(6,0) node[right]{$x$};
+\draw[->,thick] (0,-2)--(0,5) node[above]{$y$};
+
+% Original point p = (4, 0.9)
+\fill[blue] (4,0.9) circle (2pt);
+\node[blue, right] at (4,0.9) {$p(4,0.9)$};
+
+% Translated point p' = (5, -0.5)
+\fill[orange] (5,-0.5) circle (2pt);
+\node[orange, right] at (5,-0.5) {$p'(5,-0.5)$};
+
+% Final rotated point p'''' = (3.597, 3.5088)
+\fill[red] (3.597,3.5088) circle (2pt);
+\node[red, above right] at (3.597,3.5088) {$p''''(3.60,3.51)$};
+
+% Translation vector
+\draw[->, thick, green!70!black] (4,0.9)--(5,-0.5)
+    node[midway, right] {$T_t$};
+
+% Rotation arc
+\draw[->, thick, gray!70] (3.2,0) arc[start angle=0, end angle=50, radius=3.2];
+\node[gray!70] at (2.8,0.8) {$50^\circ$};
+
+% Dashed lines to indicate vectors
+\draw[blue, dashed]   (0,0)--(4,0.9);
+\draw[orange, dashed] (0,0)--(5,-0.5);
+\draw[red, dashed]    (0,0)--(3.597,3.5088);
+
+% Origin
+\fill (0,0) circle (1pt);
+\node[below left] at (0,0) {$O$};
+
+\end{tikzpicture}
+\caption{Translation of point \(p\) to \(p'\), followed by rotation by \(50^\circ\) about the \(z\)-axis, resulting in \(p''''\).}
+\end{figure}
+
+
+\subsection*{Final numeric answers (to 4 decimal places)}
+\[
+\begin{aligned}
+p'   &= \begin{bmatrix}5.0000\\[4pt]-0.5000\\[4pt]6.9000\end{bmatrix},\\[6pt]
+p''  &= \begin{bmatrix}1.8817\\[4pt]3.6427\\[4pt]-0.1000\end{bmatrix},\\[6pt]
+p''' &= \begin{bmatrix}-0.1000\\[4pt]-1.2206\\[4pt]-3.9141\end{bmatrix},\\[6pt]
+p''''&= \begin{bmatrix}3.5970\\[4pt]3.5088\\[4pt]6.9000\end{bmatrix}.
+\end{aligned}
+\]
+
+
+\paragraph*{Task 2}
+
+Convert the following Rotation using the representations below:
+
+The rotation matrix is:
+\[
+\mathcal{R} =
+\begin{bmatrix}
+0 & -1 & 0\\[4pt]
+\tfrac{\sqrt{2}}{2} & 0 & -\tfrac{\sqrt{2}}{2}\\[6pt]
+\tfrac{\sqrt{2}}{2} & 0 & \tfrac{\sqrt{2}}{2}
+\end{bmatrix}.
+\]
+
+\subsection*{(a) Euler angles (Z--Y--X sequence)}
+
+We assume the decomposition
+\[
+\mathcal{R} = R_z(\alpha)\,R_y(\beta)\,R_x(\gamma),
+\]
+where the first rotation is about the $z$--axis, the second about $y$, and the third about $x$.
+
+Solving the corresponding system of equations for the matrix entries yields the Euler angles
+\[
+\alpha = 90^\circ,\qquad
+\beta = -45^\circ,\qquad
+\gamma = 0^\circ.
+\]
+
+Thus, the Euler angle representation (Z--Y--X) is
+\[
+(\alpha,\beta,\gamma) = (90^\circ,\,-45^\circ,\,0^\circ).
+\]
+
+\subsection*{(b) Axis--Angle representation}
+
+The rotation angle is obtained from
+\[
+\theta = \arccos\!\left(\frac{\mathrm{tr}(\mathcal{R}) - 1}{2}\right).
+\]
+The trace is
+\[
+\mathrm{tr}(\mathcal{R}) 
+= 0 + 0 + \tfrac{\sqrt{2}}{2}
+= \tfrac{\sqrt{2}}{2},
+\]
+so
+\[
+\theta = \arccos\!\left(\frac{\tfrac{\sqrt{2}}{2} - 1}{2}\right)
+= \arccos\!\left(-\tfrac{1}{2} + \tfrac{\sqrt{2}}{4}\right)
+\approx 1.7178\ \text{rad}
+\approx 98.45^\circ.
+\]
+
+The rotation axis is computed using
+\[
+\mathbf{n} = 
+\frac{1}{2\sin\theta}
+\begin{bmatrix}
+R_{32} - R_{23}\\[4pt]
+R_{13} - R_{31}\\[4pt]
+R_{21} - R_{12}
+\end{bmatrix}.
+\]
+Substituting the matrix entries gives
+\[
+\mathbf{n}
+\approx
+\begin{bmatrix}
+0.3574\\[4pt]
+-0.3574\\[4pt]
+0.8629
+\end{bmatrix},
+\]
+which is already a unit vector.
+
+Thus, the minimal axis--angle representation is
+\[
+\theta \approx 98.45^\circ, \qquad
+\mathbf{n} \approx 
+\begin{bmatrix}
+0.3574\\[2pt]
+-0.3574\\[2pt]
+0.8629
+\end{bmatrix}.
+\]
+
+\subsection*{Final Results}
+
+\[
+\boxed{
+(\alpha,\beta,\gamma) = (90^\circ,\,-45^\circ,\,0^\circ)
+}
+\]
+
+\[
+\boxed{
+\text{Axis--Angle: }\ 
+\theta \approx 98.45^\circ, \quad
+\mathbf{n} \approx (0.3574,\,-0.3574,\,0.8629)^T
+}
+\]
+
+\paragraph*{Task 3}
+
+Check if the following matrices are true rotation matrices:
+
+\[
+M_1 = 
+\begin{bmatrix}
+\frac{\sqrt{3}}{2} & -\frac{1}{2} & 0 \\[6pt]
+\frac{1}{4} & \frac{\sqrt{3}}{4} & -\frac{\sqrt{3}}{2} \\[6pt]
+\frac{\sqrt{3}}{4} & \frac{3}{4} & \frac{1}{2}
+\end{bmatrix}
+\]
+
+\paragraph{Orthogonality.}
+Compute \(M_1^\top M_1\). Using exact arithmetic one obtains
+\[
+M_1^\top M_1 =
+\begin{bmatrix}
+1 & 0 & 0\\[4pt]
+0 & 1 & 0\\[4pt]
+0 & 0 & 1
+\end{bmatrix}=I_3,
+\]
+So, the columns of \(M_1\) are orthonormal and \(M_1\) is orthogonal.
+
+Column dot-products:)
+\[
+\begin{aligned}
+c_1\cdot c_1 &= \left(\tfrac{\sqrt3}{2}\right)^2 + \left(\tfrac14\right)^2 + \left(\tfrac{\sqrt3}{4}\right)^2 = 1,\\[6pt]
+c_2\cdot c_2 &= \left(-\tfrac12\right)^2 + \left(\tfrac{\sqrt3}{4}\right)^2 + \left(\tfrac34\right)^2 = 1,\\[6pt]
+c_3\cdot c_3 &= 0^2 + \left(-\tfrac{\sqrt3}{2}\right)^2 + \left(\tfrac12\right)^2 = 1,\\[6pt]
+c_i\cdot c_j &= 0\quad (i\ne j).
+\end{aligned}
+\]
+
+\paragraph{Determinant.}
+Compute the determinant (exact arithmetic):
+\[
+\det(M_1)=1.
+\]
+
+\paragraph{Conclusion.}
+Since \(M_1^\top M_1 = I_3\) (orthogonality) and \(\det(M_1)=+1\), \(M_1\) is a valid rotation matrix (a proper orthogonal matrix).
+
+\vspace{1em} % double line--break... 
+
+Similarly, for matrix \textbf{M2}:
+\[
+M_2 =
+\begin{bmatrix}
+0 & -\tfrac{\sqrt{2}}{2} & \tfrac{\sqrt{2}}{2}\\[6pt]
+\tfrac{\sqrt{2}}{2} & \tfrac{1}{2} & \tfrac{1}{2}\\[6pt]
+-\tfrac{\sqrt{2}}{2} & \tfrac{1}{2} & \tfrac{1}{2}
+\end{bmatrix}.
+\]
+
+\paragraph{Orthogonality.}
+Compute \(M_2^\top M_2\). Using exact arithmetic, one obtains
+\[
+M_2^\top M_2 =
+\begin{bmatrix}
+1 & 0 & 0\\[4pt]
+0 & 1 & 0\\[4pt]
+0 & 0 & 1
+\end{bmatrix}=I_3,
+\]
+So, the columns of \(M_2\) are orthonormal and \(M_2\) is orthogonal.
+
+Column dot-products:
+\[
+\begin{aligned}
+c_1\cdot c_1 &= 0^2 + \left(\tfrac{\sqrt2}{2}\right)^2 + \left(-\tfrac{\sqrt2}{2}\right)^2 = 1,\\[6pt]
+c_2\cdot c_2 &= \left(-\tfrac{\sqrt2}{2}\right)^2 + \left(\tfrac{1}{2}\right)^2 + \left(\tfrac{1}{2}\right)^2 = 1,\\[6pt]
+c_3\cdot c_3 &= \left(\tfrac{\sqrt2}{2}\right)^2 + \left(\tfrac{1}{2}\right)^2 + \left(\tfrac{1}{2}\right)^2 = 1,\\[6pt]
+c_i\cdot c_j &= 0\quad (i\ne j).
+\end{aligned}
+\]
+
+\paragraph{Determinant.}
+Using exact arithmetic,
+\[
+\det(M_2)=1.
+\]
+
+\paragraph{Conclusion.}
+Since \(M_2^\top M_2 = I_3\) and \(\det(M_2)=+1\), \(M_2\) is a proper rotation matrix.
+
+\vspace{1em} % double line--break... 
+
+Similarly, for matrix \textbf{M3}:
+
+\[
+M_3 =
+\begin{bmatrix}
+\tfrac{\sqrt{3}}{2} & \tfrac{1}{4} & \tfrac{1}{2}\\[6pt]
+\tfrac{\sqrt{2}}{2} & -\tfrac{\sqrt{2}}{2} & \tfrac{1}{4}\\[6pt]
+-\tfrac{\sqrt{3}}{2} & \tfrac{1}{2} & \tfrac{\sqrt{3}}{2}
+\end{bmatrix},
+\]
+denote its column vectors by \(c_1,c_2,c_3\).
+
+\paragraph{Orthonormality (column dot-products).}
+Compute the column norms and pairwise dot-products:
+\[
+\begin{aligned}
+c_1\cdot c_1 &= \left(\tfrac{\sqrt3}{2}\right)^2 + \left(\tfrac{\sqrt2}{2}\right)^2 + \left(-\tfrac{\sqrt3}{2}\right)^2
+= 2,\\[6pt]
+c_2\cdot c_2 &= \left(\tfrac{1}{4}\right)^2 + \left(-\tfrac{\sqrt2}{2}\right)^2 + \left(\tfrac{1}{2}\right)^2
+= \tfrac{13}{16} \approx 0.8125,\\[6pt]
+c_3\cdot c_3 &= \left(\tfrac{1}{2}\right)^2 + \left(\tfrac{1}{4}\right)^2 + \left(\tfrac{\sqrt3}{2}\right)^2
+= \tfrac{17}{16} \approx 1.0625,
+\end{aligned}
+\]
+and the off-diagonal dot-products
+\[
+\begin{aligned}
+c_1\cdot c_2 &= -\tfrac{1}{2} - \tfrac{\sqrt{3}}{8} \approx -0.7165,\\[6pt]
+c_1\cdot c_3 &= -\tfrac{3}{4} + \tfrac{\sqrt{2}}{8} + \tfrac{\sqrt{3}}{4} \approx -0.1402,\\[6pt]
+c_2\cdot c_3 &= -\tfrac{\sqrt{2}}{8} + \tfrac{1}{8} + \tfrac{\sqrt{3}}{4} \approx 0.3812.
+\end{aligned}
+\]
+
+Because the column norms are not all \(1\) and several off-diagonal dot-products are nonzero, the columns are not orthonormal. Equivalently,
+\[
+M_3^\top M_3 \neq I_3,
+\]
+so \(M_3\) is not orthogonal.
+
+\paragraph{Determinant.}
+Computing the determinant (exact form)
+\[
+\det(M_3) = -\frac{3\sqrt{6}}{16} - \frac{\sqrt{2}}{4} - \frac{3\sqrt{3}}{32}
+\approx -0.9752124806,
+\]
+which is not \(+1\).
+
+\paragraph{Conclusion.}
+\(M_3\) fails the two properties required for a proper rotation matrix:
+\begin{itemize}
+  \item \(M_3^\top M_3 \ne I_3\) (columns are not orthonormal), and
+  \item \(\det(M_3)\ne +1\).
+\end{itemize}
+Therefore, \(M_3\) is \textbf{not} a valid rotation matrix (it is not a proper orthogonal matrix).
+
+
+\section{B Quaternions}
+
+\paragraph*{Task 4}
+
+Given
+\[
+q_1=\begin{bmatrix}0\\[4pt]1\\[4pt]2\\[4pt]1\end{bmatrix},\qquad
+q_2=\begin{bmatrix}3\\[4pt]2\\[4pt]1\\[4pt]2\end{bmatrix}
+\]
+
+\subsection*{(a) Sum}
+Elementwise sum gives
+\[
+q_1+q_2=
+\begin{bmatrix}
+0+3\\[4pt]1+2\\[4pt]2+1\\[4pt]1+2
+\end{bmatrix}
+=
+\begin{bmatrix}3\\[4pt]3\\[4pt]3\\[4pt]3\end{bmatrix}
+\]
+
+
+\subsection*{(b) Inverse of \(q_2\)}
+The inverse of a quaternion \(q=[w,\mathbf v]\) is
+\[
+q^{-1}=\frac{q^*}{\|q\|^2},\qquad q^*=[w,-\mathbf v],
+\quad \|q\|^2=w^2+x^2+y^2+z^2.
+\]
+For \(q_2\):
+\[
+q_2^*=\begin{bmatrix}3\\[4pt]-2\\[4pt]-1\\[4pt]-2\end{bmatrix},\qquad
+\|q_2\|^2=3^2+2^2+1^2+2^2=18,
+\]
+so
+\[
+q_2^{-1}=\frac{1}{18}\begin{bmatrix}3\\[4pt]-2\\[4pt]-1\\[4pt]-2\end{bmatrix}
+=
+\begin{bmatrix}\tfrac{1}{6}\\[4pt]-\tfrac{1}{9}\\[4pt]-\tfrac{1}{18}\\[4pt]-\tfrac{1}{9}\end{bmatrix}
+\approx
+\begin{bmatrix}0.1667\\[4pt]-0.1111\\[4pt]-0.05556\\[4pt]-0.1111\end{bmatrix}.
+\]
+
+\subsection*{(c) Product \(q_1 q_2^{-1}\)}
+Write \(q=[w,(x,y,z)]\). If \(q=(w_1,\mathbf v_1)\) and \(p=(w_2,\mathbf v_2)\) then
+\[
+q p = \Big(w_1w_2 - \mathbf v_1\!\cdot\!\mathbf v_2,\;
+w_1\mathbf v_2 + w_2\mathbf v_1 + \mathbf v_1\times\mathbf v_2\Big).
+\]
+Take \(q_1=(0,(1,2,1))\) and \(q_2^{-1}=(\tfrac{1}{6},(-\tfrac{1}{9},-\tfrac{1}{18},-\tfrac{1}{9}))\).
+
+Scalar part:
+\[
+w = 0\cdot\tfrac{1}{6} - (1\cdot(-\tfrac{1}{9}) + 2\cdot(-\tfrac{1}{18}) + 1\cdot(-\tfrac{1}{9}))
+= \tfrac{1}{3}.
+\]
+
+Vector part (componentwise):
+\[
+\begin{aligned}
+x &= 0\cdot(-\tfrac{1}{9}) + \tfrac{1}{6}\cdot 1 + \big(2\cdot(-\tfrac{1}{9}) - 1\cdot(-\tfrac{1}{18})\big)
+= 0,\\[6pt]
+y &= 0\cdot(-\tfrac{1}{18}) + \tfrac{1}{6}\cdot 2 + \big(1\cdot(-\tfrac{1}{9}) - 1\cdot(-\tfrac{1}{9})\big)
+= \tfrac{1}{3},\\[6pt]
+z &= 0\cdot(-\tfrac{1}{9}) + \tfrac{1}{6}\cdot 1 + \big(1\cdot(-\tfrac{1}{18}) - 2\cdot(-\tfrac{1}{9})\big)
+= \tfrac{1}{3}.
+\end{aligned}
+\]
+
+Therefore
+\[
+q_1 q_2^{-1} =
+\begin{bmatrix}\tfrac{1}{3}\\[4pt]0\\[4pt]\tfrac{1}{3}\\[4pt]\tfrac{1}{3}\end{bmatrix}
+\approx
+\begin{bmatrix}0.3333\\[4pt]0\\[4pt]0.3333\\[4pt]0.3333\end{bmatrix}.
+\]
+
+\subsection*{Final boxed answers}
+\[
+\boxed{\,q_1+q_2=\begin{bmatrix}3\\3\\3\\3\end{bmatrix}\,},\qquad
+\boxed{\,q_2^{-1}=\begin{bmatrix}\tfrac{1}{6}\\[4pt]-\tfrac{1}{9}\\[4pt]-\tfrac{1}{18}\\[4pt]-\tfrac{1}{9}\end{bmatrix}\,},\qquad
+\boxed{\,q_1 q_2^{-1}=\begin{bmatrix}\tfrac{1}{3}\\[4pt]0\\[4pt]\tfrac{1}{3}\\[4pt]\tfrac{1}{3}\end{bmatrix}\,}.
+\]
+
+\paragraph*{Task 5}
+Given a rotation about the $x$-axis: $R_x(\phi)$ with $\phi = -40^\circ$ and a point 
+$\mathbf{x} = [8, 1.5, 1]^T$, and a second quaternion $q_2 = [-1, 2, 0, 1]^T$, solve the following:
+
+\subsection*{(a) Compute the quaternion $q_1$ representing the rotation}
+
+A quaternion for rotation about an axis $\mathbf{u} = [u_x, u_y, u_z]$ by angle $\phi$ is:
+\[
+q = 
+\begin{bmatrix}
+w \\ x \\ y \\ z
+\end{bmatrix} =
+\begin{bmatrix}
+\cos(\phi/2) \\ u_x \sin(\phi/2) \\ u_y \sin(\phi/2) \\ u_z \sin(\phi/2)
+\end{bmatrix}.
+\]
+
+For rotation about the $x$-axis, $\mathbf{u} = [1,0,0]$ and $\phi = -40^\circ = -0.6981~\text{rad}$:
+\[
+\cos(\phi/2) \approx 0.94, \quad \sin(\phi/2) \approx -0.342.
+\]
+
+Thus, the quaternion is as follows:
+\[
+\boxed{q_1 = 
+\begin{bmatrix} 0.94 \\ -0.342 \\ 0 \\ 0 \end{bmatrix}}
+\]
+
+
+\subsection*{(b) Rotate the point $\mathbf{x}$ using $q_1$}
+
+Represent the point as a pure quaternion:
+\[
+p = \begin{bmatrix}0 \\ 8 \\ 1.5 \\ 1\end{bmatrix}.
+\]
+
+The rotated point is computed using quaternion multiplication:
+\[
+p' = q_1 \, p \, q_1^{-1},
+\]
+where $q_1^{-1} = [0.94, 0.342, 0, 0]$ (since $q_1$ is a unit quaternion).
+
+After computing the multiplication (step-by-step), the rotated point is approximately:
+\[
+\boxed{\mathbf{x}' \approx \begin{bmatrix} 8 \\ 1.79 \\ -0.20 \end{bmatrix}}
+\]
+
+
+\subsection*{(c) Apply $q_1$ followed by $q_2$}
+
+First, normalize $q_2$:
+\[
+q_2 = [-1, 2, 0, 1], \quad \|q_2\| = \sqrt{(-1)^2 + 2^2 + 0^2 + 1^2} = \sqrt{6} \approx 2.449
+\]
+\[
+q_2^\text{norm} \approx [-0.408, 0.816, 0, 0.408].
+\]
+
+The combined rotation quaternion is:
+\[
+q_\text{total} = q_2^\text{norm} \cdot q_1 \approx [-0.104, 0.906, -0.139, 0.384].
+\]
+
+The final rotated point is obtained by:
+\[
+\mathbf{x}'' = q_\text{total} \, p \, q_\text{total}^{-1} \approx 
+\begin{bmatrix} 5.80 \\ -3.99 \\ 4.21 \end{bmatrix}.
+\]
+
+
+\section{C Homogeneous Representation}
+
+\paragraph*{Task 6}
+
+Given
+\[
+x_1 = \begin{bmatrix}4\\-4\end{bmatrix},\qquad
+x_2 = \begin{bmatrix}2\\1\end{bmatrix},
+\qquad
+l_1 : y = 2 - x.
+\]
+
+\subsection*{(a) Homogeneous representation of $l_1$, $x_1$, and $x_2$}
+
+Points:
+\[
+x_1^H = \begin{bmatrix}4\\-4\\1\end{bmatrix}, \qquad
+x_2^H = \begin{bmatrix}2\\1\\1\end{bmatrix}.
+\]
+
+Rewrite the line as $x + y - 2 = 0$, hence
+\[
+l_1 = \begin{bmatrix}1\\1\\-2\end{bmatrix}.
+\]
+
+\subsection*{(b) Line $l_2$ through $x_1$ and $x_2$}
+
+\[
+l_2 = x_1^H \times x_2^H
+= 
+\begin{bmatrix}
+-5\\
+-2\\
+12
+\end{bmatrix}.
+\]
+
+\subsection*{(c) Intersection of $l_1$ and $l_2$}
+
+\[
+x_{12} = l_1 \times l_2 
+= \begin{bmatrix}8\\-2\\3\end{bmatrix}.
+\]
+
+Convert to Cartesian:
+\[
+x = \frac{8}{3},\qquad
+y = -\frac{2}{3}.
+\]
+
+\subsection*{(d) Does $x_3=[4,2]^T$ lie on $l_2$?}
+
+\[
+x_3^H = \begin{bmatrix}4\\2\\1\end{bmatrix},
+\qquad
+l_2^T x_3^H = -20 - 4 + 12 = -12 \neq 0.
+\]
+
+Therefore, $x_3$ does \emph{not} lie in $l_2$.
+
+\paragraph*{Task 7}
+
+Given 
+\[
+x=\begin{bmatrix}18\\20\\-5\end{bmatrix},
+\qquad
+t=\begin{bmatrix}-1\\-2\\2\end{bmatrix}.
+\]
+
+\subsection*{(a) Translation}
+
+Homogeneous translation matrix:
+\[
+T_t=
+\begin{bmatrix}
+1&0&0&-1\\
+0&1&0&-2\\
+0&0&1&2\\
+0&0&0&1
+\end{bmatrix}.
+\]
+\[
+x'^H = T_t x^H 
+= \begin{bmatrix}17\\18\\-3\\1\end{bmatrix}.
+\]
+
+\subsection*{(b) rotation $\mathbf{R}_z(\phi)$ with $\phi = 56^\circ$}
+
+\[
+R_z(56^\circ)=
+\begin{bmatrix}
+\cos 56^\circ & -\sin 56^\circ & 0\\
+\sin 56^\circ &  \cos 56^\circ & 0\\
+0&0&1
+\end{bmatrix}
+\approx
+\begin{bmatrix}
+0.5592 & -0.8290 & 0\\
+0.8290 & 0.5592  & 0\\
+0 & 0 & 1
+\end{bmatrix}.
+\]
+\[
+x'' = R_z x
+= \begin{bmatrix}-9.5336\\26.864\\-5\end{bmatrix}.
+\]
+
+\subsection*{(c) the rigid body transformation resulting from (a) and (b)}
+
+Apply translation then rotation:
+\[
+x''' = R_z (x+t)
+= R_z
+\begin{bmatrix}17\\18\\-3\end{bmatrix}
+=
+\begin{bmatrix}
+-8.9614\\
+24.6196\\
+-3
+\end{bmatrix}.
+\]
+
+\[
+x'''^H = \begin{bmatrix}-8.9614\\24.6196\\-3\\1\end{bmatrix}.
+\]
+
+\subsection*{7(d) the transformation given by H1 followed H2 with:}
+
+Given
+\[
+H_1 =
+\begin{bmatrix}
+1 & 0 & 0 & 0\\
+0 & \tfrac{\sqrt2}{2} & \tfrac{\sqrt2}{2} & -1\\
+0 & -\tfrac{\sqrt2}{2} & \tfrac{\sqrt2}{2} & 2\\
+0 & 0 & 0 & 1
+\end{bmatrix},
+\qquad
+H_2 =
+\begin{bmatrix}
+\tfrac{\sqrt3}{2} & -\tfrac12 & 0 & 0\\
+\tfrac12 & \tfrac{\sqrt3}{2} & 0 & 1\\
+0 & 0 & 1 & 0\\
+0 & 0 & 0 & 1
+\end{bmatrix}.
+\]
+
+Applying $H_1$ followed by $H_2$ gives the combined transformation
+\[
+H = H_2 H_1 =
+\begin{bmatrix}
+\frac{\sqrt{3}}{2} & -\frac{\sqrt{2}}{4} & -\frac{\sqrt{2}}{4} & \frac12 \\[6pt]
+\frac12 & \frac{\sqrt{6}}{4} & \frac{\sqrt{6}}{4} & 1 - \frac{\sqrt{3}}{2} \\[6pt]
+0 & -\frac{\sqrt{2}}{2} & \frac{\sqrt{2}}{2} & 2 \\[6pt]
+0 & 0 & 0 & 1
+\end{bmatrix}.
+\]
+
+
+
+\end{document}
+
